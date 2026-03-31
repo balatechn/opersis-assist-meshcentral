@@ -1,0 +1,131 @@
+# ============================================================================
+# MeshCentral Production Stack — Docker Compose
+# Services: MeshCentral + MongoDB (Replica Set)
+# Compatible with Coolify Docker Compose deployment
+# ============================================================================
+
+services:
+  # ── MeshCentral Server ──────────────────────────────────────────────────
+  meshcentral:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: meshcentral-server
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      # ── Core Settings ──
+      - MC_HOSTNAME=${MC_HOSTNAME:-mesh.example.com}
+      - MC_PORT=443
+      - MC_MONGODB=mongodb://meshcentral:${MONGO_PASSWORD:-changeme}@mongodb:27017/meshcentral?authSource=admin
+      - MC_REVERSE_PROXY=${MC_REVERSE_PROXY:-true}
+      - MC_REVERSE_PROXY_PORT=${MC_REVERSE_PROXY_PORT:-443}
+      - MC_SESSION_KEY=${MC_SESSION_KEY:-}
+      # ── Feature Flags ──
+      - MC_ALLOW_NEW_ACCOUNTS=${MC_ALLOW_NEW_ACCOUNTS:-false}
+      - MC_ALLOW_LOGIN_TOKEN=true
+      - MC_ALLOW_FRAME=${MC_ALLOW_FRAME:-false}
+      - MC_MINIFY=true
+      - MC_WEBRTC=${MC_WEBRTC:-false}
+      # ── SMTP (Optional) ──
+      - MC_SMTP_HOST=${MC_SMTP_HOST:-}
+      - MC_SMTP_PORT=${MC_SMTP_PORT:-587}
+      - MC_SMTP_FROM=${MC_SMTP_FROM:-}
+      - MC_SMTP_USER=${MC_SMTP_USER:-}
+      - MC_SMTP_PASS=${MC_SMTP_PASS:-}
+      - MC_SMTP_TLS=${MC_SMTP_TLS:-true}
+      # ── Node.js ──
+      - NODE_ENV=production
+    ports:
+      - "${MC_EXTERNAL_PORT:-443}:443"
+    volumes:
+      - meshcentral-data:/opt/meshcentral/meshcentral-data
+      - meshcentral-files:/opt/meshcentral/meshcentral-files
+      - meshcentral-backups:/opt/meshcentral/meshcentral-backups
+    networks:
+      - meshcentral-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-k", "https://localhost:443/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "1.0"
+        reservations:
+          memory: 256M
+          cpus: "0.25"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # ── MongoDB Database ────────────────────────────────────────────────────
+  mongodb:
+    image: mongo:7.0
+    container_name: meshcentral-mongodb
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=meshcentral
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD:-changeme}
+      - MONGO_INITDB_DATABASE=meshcentral
+    # MongoDB replica set is required for MeshCentral change streams
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--quiet"]
+    volumes:
+      - mongodb-data:/data/db
+      - mongodb-config:/data/configdb
+      - ./scripts/mongo-init-replica.sh:/docker-entrypoint-initdb.d/init-replica.sh:ro
+    networks:
+      - meshcentral-network
+    healthcheck:
+      test: |
+        mongosh --quiet --eval "
+          try {
+            rs.status().ok
+          } catch(e) {
+            rs.initiate({_id:'rs0', members:[{_id:0, host:'mongodb:27017'}]});
+            1;
+          }
+        " || exit 1
+      interval: 15s
+      timeout: 10s
+      start_period: 30s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "0.5"
+        reservations:
+          memory: 256M
+          cpus: "0.1"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# ── Named Volumes ───────────────────────────────────────────────────────
+volumes:
+  meshcentral-data:
+    name: meshcentral-data
+  meshcentral-files:
+    name: meshcentral-files
+  meshcentral-backups:
+    name: meshcentral-backups
+  mongodb-data:
+    name: meshcentral-mongodb-data
+  mongodb-config:
+    name: meshcentral-mongodb-config
+
+# ── Network ─────────────────────────────────────────────────────────────
+networks:
+  meshcentral-network:
+    name: meshcentral-network
+    driver: bridge

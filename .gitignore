@@ -1,0 +1,7 @@
+.env
+.env.*
+!.env.example
+meshcentral-data/
+meshcentral-files/
+meshcentral-backups/
+*.log
