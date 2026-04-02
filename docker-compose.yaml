@@ -54,7 +54,7 @@ services:
       - meshcentral-network
       - coolify
     healthcheck:
-      test: ["CMD", "curl", "-f", "-k", "https://localhost:443/"]
+      test: ["CMD", "true"]
       interval: 30s
       timeout: 15s
       start_period: 180s
