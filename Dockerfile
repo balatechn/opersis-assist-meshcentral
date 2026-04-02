@@ -19,8 +19,8 @@ RUN npm install meshcentral && \
 # Stage 2: Production runtime
 FROM node:20-alpine AS production
 
-LABEL maintainer="Infra-Assist Team"
-LABEL description="MeshCentral - Production RMM Platform"
+LABEL maintainer="Opersis Assist Team"
+LABEL description="Opersis Assist - MeshCentral-based RMM Platform"
 LABEL version="1.0.0"
 
 # Install runtime dependencies only

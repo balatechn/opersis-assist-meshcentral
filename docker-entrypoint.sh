@@ -10,7 +10,8 @@ CONFIG_DIR="/opt/meshcentral/meshcentral-data"
 CONFIG_FILE="${CONFIG_DIR}/config.json"
 
 echo "┌──────────────────────────────────────────────┐"
-echo "│  🖥️  MeshCentral Production Server            │"
+echo "│  🖥️  Opersis Assist RMM Platform              │"
+echo "│  Powered by MeshCentral                      │"
 echo "│  Starting up...                               │"
 echo "└──────────────────────────────────────────────┘"
 
@@ -70,8 +71,8 @@ if [ ! -f "${CONFIG_FILE}" ]; then
   },
   "domains": {
     "": {
-      "Title": "MeshCentral",
-      "Title2": "Remote Management",
+      "Title": "Opersis Assist",
+      "Title2": "Remote Management Platform",
       "NewAccounts": ${MC_ALLOW_NEW_ACCOUNTS},
       "CertUrl": "https://${MC_HOSTNAME}",
       "GeoLocation": true,
@@ -81,7 +82,17 @@ if [ ! -f "${CONFIG_FILE}" ]; then
       "LoginKey": "auto",
       "agentConfig": ["webPush"],
       "UserRequiredPasswordLength": 12,
-      "Footer": "<a>Powered by Infra-Assist</a>"
+      "Footer": "<a>Powered by Opersis Assist</a>",
+      "agentCustomization": {
+        "displayName": "Opersis Assist Agent",
+        "description": "Opersis Assist agent for remote monitoring, management and assistance.",
+        "companyName": "Opersis",
+        "serviceName": "opersisagent",
+        "fileName": "opersisagent"
+      },
+      "assistantCustomization": {
+        "title": "Opersis Assist"
+      }
     }
   }
 }
@@ -125,7 +136,7 @@ echo "   Hostname: ${MC_HOSTNAME:-$(cat ${CONFIG_FILE} | node -e "const c=JSON.p
 echo "   Port: ${MC_PORT:-443}"
 echo "   Reverse Proxy: ${MC_REVERSE_PROXY:-false}"
 echo ""
-echo "🚀 Starting MeshCentral server..."
+echo "🚀 Starting Opersis Assist (MeshCentral) server..."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # Start MeshCentral

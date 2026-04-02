@@ -17,11 +17,11 @@ services:
         condition: service_healthy
     environment:
       # ── Core Settings ──
-      - MC_HOSTNAME=${MC_HOSTNAME:-mesh.example.com}
+      - MC_HOSTNAME=${MC_HOSTNAME:-187.127.134.246}
       - MC_PORT=443
       - MC_MONGODB=mongodb://meshcentral:${MONGO_PASSWORD:-changeme}@mongodb:27017/meshcentral?authSource=admin
-      - MC_REVERSE_PROXY=${MC_REVERSE_PROXY:-true}
-      - MC_REVERSE_PROXY_PORT=${MC_REVERSE_PROXY_PORT:-443}
+      - MC_REVERSE_PROXY=${MC_REVERSE_PROXY:-false}
+      - MC_REVERSE_PROXY_PORT=${MC_REVERSE_PROXY_PORT:-4443}
       - MC_SESSION_KEY=${MC_SESSION_KEY:-}
       # ── Feature Flags ──
       - MC_ALLOW_NEW_ACCOUNTS=${MC_ALLOW_NEW_ACCOUNTS:-false}
@@ -39,7 +39,7 @@ services:
       # ── Node.js ──
       - NODE_ENV=production
     ports:
-      - "${MC_EXTERNAL_PORT:-443}:443"
+      - "${MC_EXTERNAL_PORT:-4443}:443"
     volumes:
       - meshcentral-data:/opt/meshcentral/meshcentral-data
       - meshcentral-files:/opt/meshcentral/meshcentral-files
@@ -47,11 +47,11 @@ services:
     networks:
       - meshcentral-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "-k", "https://localhost:443/health"]
+      test: ["CMD", "curl", "-f", "-k", "https://localhost:443/"]
       interval: 30s
       timeout: 10s
-      start_period: 60s
-      retries: 3
+      start_period: 90s
+      retries: 5
     deploy:
       resources:
         limits:
