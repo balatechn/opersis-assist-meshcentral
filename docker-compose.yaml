@@ -20,7 +20,7 @@ services:
       - MC_PORT=443
       - MC_MONGODB=mongodb://meshcentral:${MONGO_PASSWORD:-changeme}@mongodb:27017/meshcentral?authSource=admin
       - MC_REVERSE_PROXY=${MC_REVERSE_PROXY:-false}
-      - MC_REVERSE_PROXY_PORT=${MC_REVERSE_PROXY_PORT:-4443}
+      - MC_REVERSE_PROXY_PORT=${MC_REVERSE_PROXY_PORT:-3000}
       - MC_SESSION_KEY=${MC_SESSION_KEY:-}
       # ── Feature Flags ──
       - MC_ALLOW_NEW_ACCOUNTS=${MC_ALLOW_NEW_ACCOUNTS:-false}
@@ -38,7 +38,7 @@ services:
       # ── Node.js ──
       - NODE_ENV=production
     ports:
-      - "${MC_EXTERNAL_PORT:-4443}:443"
+      - "${MC_EXTERNAL_PORT:-3000}:443"
     volumes:
       - meshcentral-data:/opt/meshcentral/meshcentral-data
       - meshcentral-files:/opt/meshcentral/meshcentral-files
