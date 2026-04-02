@@ -19,7 +19,7 @@ services:
       - MC_HOSTNAME=${MC_HOSTNAME:-187.127.134.246}
       - MC_PORT=443
       - MC_MONGODB=mongodb://meshcentral:${MONGO_PASSWORD:-changeme}@mongodb:27017/meshcentral?authSource=admin
-      - MC_REVERSE_PROXY=${MC_REVERSE_PROXY:-true}
+      - MC_REVERSE_PROXY=${MC_REVERSE_PROXY:-false}
       - MC_REVERSE_PROXY_PORT=${MC_REVERSE_PROXY_PORT:-443}
       - MC_SESSION_KEY=${MC_SESSION_KEY:-}
       # ── Feature Flags ──
@@ -54,7 +54,7 @@ services:
       - meshcentral-network
       - coolify
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:443/"]
+      test: ["CMD", "curl", "-f", "-k", "https://localhost:443/"]
       interval: 30s
       timeout: 10s
       start_period: 90s
