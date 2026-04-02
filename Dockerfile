@@ -41,8 +41,7 @@ RUN mkdir -p meshcentral-data meshcentral-files meshcentral-backups meshcentral-
     && chown -R meshcentral:meshcentral /opt/meshcentral
 
 # Copy entrypoint script
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 # Expose ports
 # 443  - HTTPS (main web interface)

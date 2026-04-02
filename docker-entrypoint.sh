@@ -9,36 +9,37 @@ set -e
 CONFIG_DIR="/opt/meshcentral/meshcentral-data"
 CONFIG_FILE="${CONFIG_DIR}/config.json"
 
-echo "┌──────────────────────────────────────────────┐"
-echo "│  🖥️  Opersis Assist RMM Platform              │"
-echo "│  Powered by MeshCentral                      │"
-echo "│  Starting up...                               │"
-echo "└──────────────────────────────────────────────┘"
+echo "=== Opersis Assist RMM Platform ==="
+echo "Starting up..."
+echo "Working directory: $(pwd)"
+echo "Config dir exists: $(test -d ${CONFIG_DIR} && echo yes || echo no)"
+
+# Ensure config directory exists
+mkdir -p "${CONFIG_DIR}" 2>/dev/null || true
 
 # ── Generate config.json from environment variables (always regenerated) ──
-echo "⚙️  Generating production configuration from environment variables..."
-    
-    # Set defaults for environment variables
-    MC_HOSTNAME="${MC_HOSTNAME:-localhost}"
-    MC_PORT="${MC_PORT:-443}"
-    MC_MONGODB="${MC_MONGODB:-mongodb://mongodb:27017/meshcentral}"
-    MC_REVERSE_PROXY="${MC_REVERSE_PROXY:-false}"
-    MC_REVERSE_PROXY_PORT="${MC_REVERSE_PROXY_PORT:-443}"
-    MC_ALLOW_NEW_ACCOUNTS="${MC_ALLOW_NEW_ACCOUNTS:-false}"
-    MC_ALLOW_LOGIN_TOKEN="${MC_ALLOW_LOGIN_TOKEN:-true}"
-    MC_ALLOW_FRAME="${MC_ALLOW_FRAME:-false}"
-    MC_MINIFY="${MC_MINIFY:-true}"
-    MC_SESSION_KEY="${MC_SESSION_KEY:-$(openssl rand -hex 32)}"
-    MC_WEBRTC="${MC_WEBRTC:-false}"
-    MC_SMTP_HOST="${MC_SMTP_HOST:-}"
-    MC_SMTP_PORT="${MC_SMTP_PORT:-587}"
-    MC_SMTP_FROM="${MC_SMTP_FROM:-}"
-    MC_SMTP_USER="${MC_SMTP_USER:-}"
-    MC_SMTP_PASS="${MC_SMTP_PASS:-}"
-    MC_SMTP_TLS="${MC_SMTP_TLS:-true}"
+echo "Generating config.json..."
 
-    # Build config.json
-    cat > "${CONFIG_FILE}" << CONFIGEOF
+MC_HOSTNAME="${MC_HOSTNAME:-localhost}"
+MC_PORT="${MC_PORT:-443}"
+MC_MONGODB="${MC_MONGODB:-mongodb://mongodb:27017/meshcentral}"
+MC_REVERSE_PROXY="${MC_REVERSE_PROXY:-false}"
+MC_REVERSE_PROXY_PORT="${MC_REVERSE_PROXY_PORT:-443}"
+MC_ALLOW_NEW_ACCOUNTS="${MC_ALLOW_NEW_ACCOUNTS:-false}"
+MC_ALLOW_LOGIN_TOKEN="${MC_ALLOW_LOGIN_TOKEN:-true}"
+MC_ALLOW_FRAME="${MC_ALLOW_FRAME:-false}"
+MC_MINIFY="${MC_MINIFY:-true}"
+MC_SESSION_KEY="${MC_SESSION_KEY:-$(openssl rand -hex 32)}"
+MC_WEBRTC="${MC_WEBRTC:-false}"
+MC_SMTP_HOST="${MC_SMTP_HOST:-}"
+MC_SMTP_PORT="${MC_SMTP_PORT:-587}"
+MC_SMTP_FROM="${MC_SMTP_FROM:-}"
+MC_SMTP_USER="${MC_SMTP_USER:-}"
+MC_SMTP_PASS="${MC_SMTP_PASS:-}"
+MC_SMTP_TLS="${MC_SMTP_TLS:-true}"
+
+# Build config.json
+cat > "${CONFIG_FILE}" << CONFIGEOF
 {
   "\$schema": "https://raw.githubusercontent.com/Ylianst/MeshCentral/master/meshcentral-config-schema.json",
   "settings": {
@@ -97,11 +98,10 @@ echo "⚙️  Generating production configuration from environment variables..."
 }
 CONFIGEOF
 
-    # Add SMTP configuration if provided
-    if [ -n "${MC_SMTP_HOST}" ] && [ -n "${MC_SMTP_FROM}" ]; then
-        echo "📧 SMTP configuration detected. Adding email settings..."
-        # Use a temp file approach to add SMTP to config
-        SMTP_CONFIG=$(cat << SMTPEOF
+# Add SMTP configuration if provided
+if [ -n "${MC_SMTP_HOST}" ] && [ -n "${MC_SMTP_FROM}" ]; then
+    echo "SMTP configuration detected. Adding email settings..."
+    SMTP_CONFIG=$(cat << SMTPEOF
 {
   "smtp": {
     "host": "${MC_SMTP_HOST}",
@@ -114,26 +114,25 @@ CONFIGEOF
 }
 SMTPEOF
 )
-        # Merge SMTP into existing config (using node since we have it)
-        node -e "
-          const fs = require('fs');
-          const config = JSON.parse(fs.readFileSync('${CONFIG_FILE}', 'utf8'));
-          const smtp = ${SMTP_CONFIG};
-          config.domains[''].smtp = smtp.smtp;
-          fs.writeFileSync('${CONFIG_FILE}', JSON.stringify(config, null, 2));
-        "
-    fi
+    # Merge SMTP into existing config (using node since we have it)
+    node -e "
+      const fs = require('fs');
+      const config = JSON.parse(fs.readFileSync('${CONFIG_FILE}', 'utf8'));
+      const smtp = ${SMTP_CONFIG};
+      config.domains[''].smtp = smtp.smtp;
+      fs.writeFileSync('${CONFIG_FILE}', JSON.stringify(config, null, 2));
+    "
+fi
 
-    echo "✅ config.json generated successfully!"
+echo "config.json generated successfully!"
 
 echo ""
-echo "🔧 Configuration:"
-echo "   Hostname: ${MC_HOSTNAME:-$(cat ${CONFIG_FILE} | node -e "const c=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));console.log(c.settings.Cert||'localhost')")}"
-echo "   Port: ${MC_PORT:-443}"
-echo "   Reverse Proxy: ${MC_REVERSE_PROXY:-false}"
+echo "Configuration:"
+echo "  Hostname: ${MC_HOSTNAME}"
+echo "  Port: ${MC_PORT}"
+echo "  Reverse Proxy: ${MC_REVERSE_PROXY}"
 echo ""
-echo "🚀 Starting Opersis Assist (MeshCentral) server..."
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "Starting Opersis Assist (MeshCentral) server..."
 
 # Start MeshCentral
 exec node node_modules/meshcentral
