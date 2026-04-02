@@ -15,9 +15,8 @@ echo "│  Powered by MeshCentral                      │"
 echo "│  Starting up...                               │"
 echo "└──────────────────────────────────────────────┘"
 
-# ── Generate config.json if it doesn't exist ──
-if [ ! -f "${CONFIG_FILE}" ]; then
-    echo "⚙️  No config.json found. Generating production configuration..."
+# ── Generate config.json from environment variables (always regenerated) ──
+echo "⚙️  Generating production configuration from environment variables..."
     
     # Set defaults for environment variables
     MC_HOSTNAME="${MC_HOSTNAME:-localhost}"
@@ -126,9 +125,6 @@ SMTPEOF
     fi
 
     echo "✅ config.json generated successfully!"
-else
-    echo "✅ Existing config.json found. Using current configuration."
-fi
 
 echo ""
 echo "🔧 Configuration:"

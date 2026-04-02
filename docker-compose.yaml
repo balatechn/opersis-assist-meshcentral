@@ -19,8 +19,8 @@ services:
       - MC_HOSTNAME=${MC_HOSTNAME:-187.127.134.246}
       - MC_PORT=443
       - MC_MONGODB=mongodb://meshcentral:${MONGO_PASSWORD:-changeme}@mongodb:27017/meshcentral?authSource=admin
-      - MC_REVERSE_PROXY=${MC_REVERSE_PROXY:-false}
-      - MC_REVERSE_PROXY_PORT=${MC_REVERSE_PROXY_PORT:-3000}
+      - MC_REVERSE_PROXY=${MC_REVERSE_PROXY:-true}
+      - MC_REVERSE_PROXY_PORT=${MC_REVERSE_PROXY_PORT:-443}
       - MC_SESSION_KEY=${MC_SESSION_KEY:-}
       # ── Feature Flags ──
       - MC_ALLOW_NEW_ACCOUNTS=${MC_ALLOW_NEW_ACCOUNTS:-false}
@@ -37,8 +37,8 @@ services:
       - MC_SMTP_TLS=${MC_SMTP_TLS:-true}
       # ── Node.js ──
       - NODE_ENV=production
-    ports:
-      - "${MC_EXTERNAL_PORT:-3000}:443"
+    expose:
+      - "443"
     volumes:
       - meshcentral-data:/opt/meshcentral/meshcentral-data
       - meshcentral-files:/opt/meshcentral/meshcentral-files
