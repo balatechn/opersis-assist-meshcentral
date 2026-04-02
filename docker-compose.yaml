@@ -37,6 +37,13 @@ services:
       - MC_SMTP_TLS=${MC_SMTP_TLS:-true}
       # ── Node.js ──
       - NODE_ENV=production
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.meshcentral-http.entrypoints=http"
+      - "traefik.http.routers.meshcentral-http.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.meshcentral-http.service=meshcentral-svc"
+      - "traefik.http.services.meshcentral-svc.loadbalancer.server.port=443"
+      - "caddy_ingress_network=coolify"
     expose:
       - "443"
     volumes:
