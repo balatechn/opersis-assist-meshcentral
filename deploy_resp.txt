@@ -1,0 +1,1 @@
+{"deployments":[{"message":"Application opersis-meshcentral deployment queued.","resource_uuid":"i11j43772pgb7hnxuxdn8uou","deployment_uuid":"h1ajsgpmzxp894ywgqph5smi"}]}

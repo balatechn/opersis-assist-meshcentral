@@ -45,8 +45,9 @@ services:
       - meshcentral-backups:/opt/meshcentral/meshcentral-backups
     networks:
       - meshcentral-network
+      - coolify
     healthcheck:
-      test: ["CMD", "curl", "-f", "-k", "https://localhost:443/"]
+      test: ["CMD", "curl", "-f", "http://localhost:443/"]
       interval: 30s
       timeout: 10s
       start_period: 90s
@@ -111,3 +112,5 @@ volumes:
 networks:
   meshcentral-network:
     driver: bridge
+  coolify:
+    external: true
